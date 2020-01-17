@@ -1,0 +1,72 @@
+<div class="container-fluid">
+
+    <div class="row">
+        <div class="offset-1 col-sm-8">
+            <form style="margin-top: 20px" method="get" action="search">
+                <div class="form-group">
+                    <label for="exampleFormControlInput1">内容搜索：</label>
+                    <input type="text" name="content" class="form-control" id="searchContent">
+                </div>
+            </form>
+
+            <ul class="list-group" id="fileList-container">
+
+            </ul>
+        </div>
+        <div class="col-sm-2">
+            <ul class="list-group" style="margin-top: 20px;margin-bottom: 20px" id="catalog-container">
+
+            </ul>
+        </div>
+    </div>
+</div>
+<script>
+
+    function selectCatalog(data) {
+        // 1. 查看当前的url地址类型
+        // 2. 获取当前活跃的catalog
+        // 3. 请求对应catalog下的目录
+        var text = $(data).text();
+
+        $.ajax({
+            url: urls.fileList,
+            data: {
+                catalog: text
+            },
+            success: function (res) {
+                if (res.code == 200) {
+                    var data = res.data;
+                    var fileListHtml = "";
+                    for (var i = 0; i < data.length; i++) {
+                        fileListHtml += "<li class=\"list-group-item\">\n" +
+                            "                    <a href=\"content.html?fileName=" + data[i] + "&catalog=" + text + "\">" + data[i] + "</a>\n" +
+                            "                </li>"
+                    }
+                    $("#fileList-container").html(fileListHtml)
+
+                }
+            }
+        })
+    }
+
+    $(function () {
+
+
+        $.ajax({
+            url: urls.catalog,
+            success: function (res) {
+                if (res.code == 200) {
+                    var data = res.data;
+                    var cataLogHtml = "";
+                    for (var i = 0; i < data.length; i++) {
+                        cataLogHtml += "<li catalog class=\"list-group-item\" onclick='selectCatalog(this)'>" + data[i] + "</li>"
+                    }
+                    $("#catalog-container").html(cataLogHtml)
+
+                }
+            }
+        })
+
+
+    })
+</script>
