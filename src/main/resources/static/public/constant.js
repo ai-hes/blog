@@ -1,4 +1,4 @@
-var host = "http://127.0.0.1:8082";
+var host = "";
 
 var urls = {
     catalog: host + "/blog/catalog",

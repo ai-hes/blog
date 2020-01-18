@@ -13,6 +13,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Properties;
 
 /**
@@ -56,19 +57,44 @@ public class OssUtils {
     }
 
     public static String uploadUrl(String url) {
-        InputStream inputStream = null;
         try {
+
             String objectKey = prefix + getUrlLastPath(url);
-            inputStream = new URL(url).openStream();
-
             Path target = Paths.get(System.getProperty("java.io.tmpdir") + getUrlLastPath(url));
-
-            Files.copy(inputStream, target);
-
-            PutObjectResult putObjectResult = getOssClient().putObject(bucketName, objectKey, target.toFile());
+            copyFiletoLocal(url, target);
+            if (!isExist(objectKey)){
+                PutObjectResult putObjectResult = getOssClient().putObject(bucketName, objectKey, target.toFile());
+            }
             return String.format(keyFormat, objectKey);
         } catch (IOException | URISyntaxException e) {
             throw new BlogException("上传OSS异常" + e.getMessage());
+        }
+    }
+
+    /**
+     * 判断对象是否存在
+     * @param objectKey
+     * @return
+     */
+    private static boolean isExist(String objectKey) {
+        boolean exist = getOssClient().doesObjectExist(bucketName, objectKey);
+        return exist;
+    }
+
+    /**
+     * 一些图片可能只下载部分，导致无法查看
+     * @param url
+     * @param target
+     * @throws IOException
+     * @throws URISyntaxException
+     */
+    private static void copyFiletoLocal(String url, Path target) throws IOException, URISyntaxException {
+        for (int i = 0; i < 3; i++) {
+            InputStream inputStream = new URL(url).openStream();
+            long fileLength = Files.copy(inputStream, target, StandardCopyOption.REPLACE_EXISTING);
+            if (fileLength > 1000) {
+                break;
+            }
         }
     }
 
