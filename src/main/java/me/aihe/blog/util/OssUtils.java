@@ -24,20 +24,28 @@ import java.util.Properties;
  */
 public class OssUtils {
 
-    static OSSClient ossClient;
+    private static OSSClient ossClient;
 
-    static String prefix = "jianshu/";
+    /**
+     * 上传到OSS之后文件的前缀
+     */
+    private static String prefix = "jianshu/";
 
-    static String bucketName = "aihes";
+    /**
+     * OSS具体的存储空间名称
+     */
+    private static String bucketName = "aihes";
 
-    static String keyFormat = "https://aihes.oss-cn-hangzhou.aliyuncs.com/%s";
+    /**
+     * 完整的OSS文件地址
+     */
+    private static String keyFormat = "https://aihes.oss-cn-hangzhou.aliyuncs.com/%s";
 
-    public static void main(String[] args) {
-        Properties properties = System.getProperties();
-        for (Object o : properties.keySet()) {
-            System.out.println(o.toString() + properties.get(o));
-        }
-    }
+    /**
+     * 重试下载网络文件次数
+     */
+    private static int retryCount = 3;
+
 
     private static OSSClient getOssClient() {
         if (ossClient != null) {
@@ -59,10 +67,11 @@ public class OssUtils {
     public static String uploadUrl(String url) {
         try {
 
-            String objectKey = prefix + getUrlLastPath(url);
+            String objectKey = generateOssObjectKey(url);
+
             Path target = Paths.get(System.getProperty("java.io.tmpdir") + getUrlLastPath(url));
             copyFiletoLocal(url, target);
-            if (!isExist(objectKey)){
+            if (!isExist(objectKey)) {
                 PutObjectResult putObjectResult = getOssClient().putObject(bucketName, objectKey, target.toFile());
             }
             return String.format(keyFormat, objectKey);
@@ -72,7 +81,19 @@ public class OssUtils {
     }
 
     /**
+     * 生成上传到OSS存储空间时的文件key
+     *
+     * @param url
+     * @return
+     * @throws URISyntaxException
+     */
+    private static String generateOssObjectKey(String url) throws URISyntaxException {
+        return prefix + getUrlLastPath(url);
+    }
+
+    /**
      * 判断对象是否存在
+     *
      * @param objectKey
      * @return
      */
@@ -83,13 +104,14 @@ public class OssUtils {
 
     /**
      * 一些图片可能只下载部分，导致无法查看
+     *
      * @param url
      * @param target
      * @throws IOException
      * @throws URISyntaxException
      */
     private static void copyFiletoLocal(String url, Path target) throws IOException, URISyntaxException {
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < retryCount; i++) {
             InputStream inputStream = new URL(url).openStream();
             long fileLength = Files.copy(inputStream, target, StandardCopyOption.REPLACE_EXISTING);
             if (fileLength > 1000) {
@@ -98,6 +120,12 @@ public class OssUtils {
         }
     }
 
+    /**
+     * 获取url地址中路径最后的文件名
+     * @param url
+     * @return
+     * @throws URISyntaxException
+     */
     public static String getUrlLastPath(String url) throws URISyntaxException {
         URI uri = new URI(url);
         String path = uri.getPath();

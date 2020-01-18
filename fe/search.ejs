@@ -19,7 +19,7 @@
         var query = url.search;
 
         $.ajax({
-            url: urls.search + query,
+            url: urls.grep + query,
             success:function (res) {
                 console.log(res)
                 var data = res.data;

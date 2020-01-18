@@ -31,9 +31,9 @@
         $(data).addClass("active")
 
         $.ajax({
-            url: urls.fileList,
+            url: urls.ls,
             data: {
-                catalog: text
+                file: text
             },
             success: function (res) {
                 if (res.code == 200) {
@@ -55,7 +55,7 @@
 
 
         $.ajax({
-            url: urls.catalog,
+            url: urls.ls,
             success: function (res) {
                 if (res.code == 200) {
                     var data = res.data;

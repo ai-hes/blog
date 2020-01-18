@@ -133,3 +133,4 @@ fe/www/main.css
 fe/www/public/bootstrap.css
 fe/www/public/bootstrap.min.css
 src/main/resources/application.properties
+src/main/resources/application.yml

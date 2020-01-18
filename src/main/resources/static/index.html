@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1">-->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.17.1/build/styles/default.min.css">
@@ -47,9 +47,9 @@
         $(data).addClass("active")
 
         $.ajax({
-            url: urls.fileList,
+            url: urls.ls,
             data: {
-                catalog: text
+                file: text
             },
             success: function (res) {
                 if (res.code == 200) {
@@ -71,7 +71,7 @@
 
 
         $.ajax({
-            url: urls.catalog,
+            url: urls.ls,
             success: function (res) {
                 if (res.code == 200) {
                     var data = res.data;
