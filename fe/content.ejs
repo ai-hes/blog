@@ -1,7 +1,8 @@
 <div class="container-fluid">
     <div class="row">
         <div class="offset-2 col-sm-8">
-            <div id="blog-content" style="margin-top: 60px">
+            <h3 id="blog-title" style="margin: 20px auto">高效工作法</h3>
+            <div id="blog-content">
             </div>
         </div>
     </div>
@@ -14,6 +15,12 @@
         var href = window.location.href;
         var url = new URL(href);
         var query = url.search;
+        var fileName = url.searchParams.get("fileName");
+        if (fileName){
+
+            $("#blog-title").text( fileName.replace("md","").replace("html","") )
+
+        }
 
         $.ajax({
             url: urls.cat + query,
