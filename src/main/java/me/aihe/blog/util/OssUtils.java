@@ -14,7 +14,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Properties;
+
+import static me.aihe.blog.constant.OssConstants.*;
 
 /**
  * @author he.ai aihehe123@gmail.com
@@ -27,16 +28,6 @@ public class OssUtils {
     private static OSSClient ossClient;
 
     /**
-     * 上传到OSS之后文件的前缀
-     */
-    private static String prefix = "jianshu/";
-
-    /**
-     * OSS具体的存储空间名称
-     */
-    private static String bucketName = "aihes";
-
-    /**
      * 完整的OSS文件地址
      */
     private static String keyFormat = "https://aihes.oss-cn-hangzhou.aliyuncs.com/%s";
@@ -47,7 +38,7 @@ public class OssUtils {
     private static int retryCount = 3;
 
 
-    private static OSSClient getOssClient() {
+    public static OSSClient getOssClient() {
         if (ossClient != null) {
             return ossClient;
         }
@@ -65,14 +56,23 @@ public class OssUtils {
     }
 
     public static String uploadUrl(String url) {
+        return doUploadUrl(url, false);
+    }
+
+    public static String uploadUrl(String url, boolean force) {
+        return doUploadUrl(url, force);
+    }
+
+
+    private static String doUploadUrl(String url, boolean force) {
         try {
 
             String objectKey = generateOssObjectKey(url);
 
             Path target = Paths.get(System.getProperty("java.io.tmpdir") + getUrlLastPath(url));
             copyFiletoLocal(url, target);
-            if (!isExist(objectKey)) {
-                PutObjectResult putObjectResult = getOssClient().putObject(bucketName, objectKey, target.toFile());
+            if (!isExist(objectKey) || force) {
+                PutObjectResult putObjectResult = getOssClient().putObject(BUCKET_NAME, objectKey, target.toFile());
             }
             return String.format(keyFormat, objectKey);
         } catch (IOException | URISyntaxException e) {
@@ -88,7 +88,7 @@ public class OssUtils {
      * @throws URISyntaxException
      */
     private static String generateOssObjectKey(String url) throws URISyntaxException {
-        return prefix + getUrlLastPath(url);
+        return PREFIX + getUrlLastPath(url);
     }
 
     /**
@@ -98,7 +98,7 @@ public class OssUtils {
      * @return
      */
     private static boolean isExist(String objectKey) {
-        boolean exist = getOssClient().doesObjectExist(bucketName, objectKey);
+        boolean exist = getOssClient().doesObjectExist(BUCKET_NAME, objectKey);
         return exist;
     }
 
@@ -122,6 +122,7 @@ public class OssUtils {
 
     /**
      * 获取url地址中路径最后的文件名
+     *
      * @param url
      * @return
      * @throws URISyntaxException
